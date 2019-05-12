@@ -44,11 +44,115 @@ public class Main {
         program.add("POP 2");
         program.add("HALT");
 
+
+        //run the program and print every stack after each step
+
         while(!program.get(programCounter).equals("HALT")){
-            System.out.println(program.get(programCounter));
-            programCounter++;
+            String str = program.get(programCounter);
+            boolean stackChanged =false;
+
+            String[] temp = str.split(" ");
+            switch (temp[0]){
+                case "GOTO" :
+                    while(!(program.get(programCounter+1).contains(temp[1])))
+                    {
+                        programCounter++;
+                    }
+                    stackChanged=true;
+                    break;
+
+                case "LIT" :
+                    if(temp.length == 3 )
+                    {
+                        stack.push(temp[1] + "" + temp[2]);
+                    }
+                    if(temp.length ==2 ) 
+                    {
+                        stack.push(temp[1]);
+                    }
+                    programCounter++;
+                    stackChanged=true;
+                    break;
+
+                case "LOAD" :
+                    String toLoad = "";
+                    for(String i:stack)
+                    {
+                        if(i.contains(temp[2]))
+                        {
+                            toLoad = i.substring(0,1);
+                        }
+                    }
+                    if(!(toLoad.equals("")))
+                    {
+                        stack.push(toLoad);
+                    }
+                    programCounter++;
+                    stackChanged=true;
+                    break;
+
+                case "STORE" :
+                    String toStore = "";
+                    int whereToStore = 0;
+                    for(int i=0; i<stack.size(); i++)
+                    {
+                        if(stack.get(i).contains(temp[2]))
+                        {
+                            toStore = stack.get(stack.size()-1) +""+temp[2];
+                            whereToStore = i;
+                        }
+                    }
+                    if(!(toStore.equals("")))
+                    {
+                        stack.set(whereToStore,toStore);
+                        stack.pop();
+                    }
+                    programCounter++;
+                    stackChanged=true;
+                    break;
+
+                case "BOP" :
+                    int one = Integer.parseInt(stack.get(stack.size()-1).substring(0,1));
+                    int two = Integer.parseInt(stack.get(stack.size()-2).substring(0,1));
+                    int three = one + two;
+                    stack.pop();
+                    stack.pop();
+                    stack.push(Integer.toString(three));
+
+                    programCounter++;
+                    stackChanged=true;
+                    break;
+
+                case "POP" :
+                    for(int i=0;i<Integer.parseInt(temp[1]);i++)
+                    {
+                        stack.pop();
+                    }
+                    programCounter++;
+                    stackChanged=true;
+                    break;
+
+                case "CALL" :
+                    if(temp[1].equals("Write"))
+                    {
+                        System.out.println(stack.toString() + " ~From \"CALL Write\"");
+                    }
+                    programCounter++;
+                    stackChanged=false;
+                    break;
+
+                default:
+                    programCounter++;
+                    stackChanged=false;
+                    break;
+            }
+
+            if(stackChanged) 
+            {
+                System.out.println(stack.toString());
+            }
         }
 
-        // TODO run the program and print every stack after each step
     }
+
 }
